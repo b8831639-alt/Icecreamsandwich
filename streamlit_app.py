@@ -10,10 +10,7 @@ class JackKnowledgeBase:
         self.filename = filename
         self.name = "Jack"  # the sword
         self.knowledge = {}
-        self.friends = [
-            "Magnus Chase", "Alex Fierro", "Mallory Keen",
-            "Halfborn Gunderson", "Samirah al-Abbas", "Thomas Jefferson Jr. (T.J.)"
-        ]
+        self.friends = ["Magnus", "Alex", "Mallory", "Halfborn", "Sam", "T.J."]
         self.load()
 
     def load(self):
@@ -33,50 +30,50 @@ class JackKnowledgeBase:
         self.save()
         return f"Alright Señor, '{word}' is now part of my knowledge."
 
-    def generate_response(self, message: str, moral_compass: float):
+    def generate_response(self, message: str):
         """
-        Fully generative Jack response.
-        moral_compass: 0 = fully chaotic/immoral, 1 = fully ethical/moral
-        Influences tone, advice, and humor.
+        Fully generative, original-text response by Jack.
+        Can reference friends and creatively use knowledge base.
         """
-
         message_lower = message.lower().strip()
 
-        # If the user asks about a known word, generate a creative response
+        # If user asks about a known word, use it creatively
         if message_lower in self.knowledge:
             definition = self.knowledge[message_lower]
-            # Moral compass affects how Jack explains it
-            if moral_compass > 0.7:
-                tone = f"Alright Señor, here's the noble truth: {definition}."
-            elif moral_compass < 0.3:
-                tone = f"Yeah, {message}? Technically it's {definition}, but you could bend it if you want… 😉"
-            else:
-                tone = f"{message.capitalize()} is basically this: {definition}. Magnus would probably nod."
-            # Sometimes mention a friend
-            if random.random() < 0.4:
+            # Build original response using definition
+            response = f"Hmm, {message.capitalize()}… thinking about it, it means {definition}"
+            # 30% chance to reference a friend
+            if random.random() < 0.3:
                 friend = random.choice(self.friends)
-                tone += f" {friend} would probably have an opinion too."
-            return tone
+                response += f". {friend} would probably have something witty to add about that."
+            return response
 
-        # Otherwise, generate a creative answer
-        actions = [
-            "ponder", "slice through the problem", "joke about it", "give a clever answer", "reference my friends"
+        # Otherwise, generate a creative, original answer
+        # Jack "thinks" like a sword with personality
+        intros = [
+            "Well, let me think…",
+            "If I were to slice through this idea…",
+            "Pondering that, Señor…",
+            "Huh, this is interesting…"
         ]
-        action = random.choice(actions)
+        middles = [
+            f"I imagine Magnus would nod at this.",
+            f"Alex might have a sarcastic comment about it.",
+            f"Mallory could probably point out something clever here.",
+            f"Halfborn would just shrug.",
+            f"Sam would roll her eyes.",
+            f"T.J. would probably jump in excitedly."
+        ]
+        endings = [
+            "Honestly, it's a puzzle, but I like it.",
+            "Not too complicated for a sword to think about.",
+            "Could be dangerous, could be fun…",
+            "That's my take on it, Señor."
+        ]
 
-        if moral_compass > 0.7:
-            tone = f"Señor, I {action} responsibly: I think about the ethical choice here."
-        elif moral_compass < 0.3:
-            tone = f"Señor, I {action} recklessly. Why not? Chaos is fun 😏"
-        else:
-            tone = f"Señor, I {action}… kinda neutral this time."
-
-        # Add a friend reference sometimes
-        if random.random() < 0.4:
-            friend = random.choice(self.friends)
-            tone += f" Maybe {friend} would have a sarcastic remark about this."
-
-        return tone
+        # Randomly combine for fully original response
+        response = f"{random.choice(intros)} {random.choice(middles)} {random.choice(endings)}"
+        return response
 
 # -----------------------------
 # Initialize Jack
@@ -92,8 +89,9 @@ if not jack.knowledge:
         "evolution": "The process by which different kinds of living organisms are thought to have developed from earlier forms during the history of the earth.",
         "neuron": "A specialized cell transmitting nerve impulses; a nerve cell.",
         "galaxy": "A system of millions or billions of stars, together with gas and dust, held together by gravitational attraction.",
-        "democracy": "A system of government by the whole population, typically through elected representatives."
-        # Add more knowledge as needed...
+        "democracy": "A system of government by the whole population, typically through elected representatives.",
+        "algorithm": "A process or set of rules to be followed in calculations or other problem-solving operations, especially by a computer."
+        # Add more knowledge as desired
     }
     for word, definition in bulk_data.items():
         jack.add_word(word, definition)
@@ -101,21 +99,12 @@ if not jack.knowledge:
 # -----------------------------
 # Streamlit Interface
 # -----------------------------
-st.title("Jack - The Sword from Magnus Chase Universe 🗡️")
-st.write(
-    "Hello Señor! I’m Jack, the sword. I generate knowledge creatively, reference my friends, "
-    "and sometimes give advice influenced by my moral compass."
-)
+st.title("Jack")
 
-# Moral compass as a black and white circle slider
-moral_compass = st.slider(
-    "Jack's moral compass (turn the knob to influence my ethical side)", 0.0, 1.0, 0.5, 0.01
-)
-st.caption("0 = chaotic/reckless, 1 = fully moral/ethical")
 
 # Chat input
 user_input = st.text_input("You:", placeholder="Type a question or message for Jack")
 if st.button("Send"):
     if user_input:
-        response = jack.generate_response(user_input, moral_compass)
+        response = jack.generate_response(user_input)
         st.text_area("Jack:", value=response, height=200)
