@@ -81,11 +81,8 @@ if not jack.knowledge:
 # -----------------------------
 # Streamlit Interface
 # -----------------------------
-st.title("Jack 🗡️")
-st.write(
-    "Hello Señor! I am Jack, the sword. I generate fully original responses. "
-    "I will only talk about friends if you explicitly ask."
-)
+st.title("Jack")
+
 
 # Initialize session state for chat history
 if "chat_history" not in st.session_state:
