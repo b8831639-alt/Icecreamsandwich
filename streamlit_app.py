@@ -8,7 +8,7 @@ import random
 class JackKnowledgeBase:
     def __init__(self, filename="jack_kb.json"):
         self.filename = filename
-        self.name = "Jack"  # always just Jack
+        self.name = "Jack"  # always Jack
         self.knowledge = {}
         self.friends = ["Magnus", "Alex", "Mallory", "Halfborn", "Sam", "T.J."]
         self.load()
@@ -40,17 +40,14 @@ class JackKnowledgeBase:
         # If user asks about a known word
         if message_lower in self.knowledge:
             definition = self.knowledge[message_lower]
-            response = f"{message.capitalize()}… Jack thinks it means {definition}."
-            return response
+            return f"{message.capitalize()}… Jack thinks it means {definition}."
 
-        # If user explicitly asks about a friend
+        # If the user asks about a friend
         for friend in self.friends:
             if friend.lower() in message_lower:
-                response = f"You asked about {friend}? Jack can tell you something interesting about them."
-                return response
+                return f"You asked about {friend}? Jack can tell you something interesting about them."
 
-        # Otherwise, purely generative original response
-        # Jack "thinks" like a sword
+        # Otherwise, fully generative response
         verbs = ["ponder", "analyze", "slice through", "examine", "weigh"]
         actions = ["the idea", "the concept", "the situation", "the question", "this matter"]
         descriptors = ["carefully", "with precision", "thoughtfully", "unexpectedly", "curiously"]
@@ -59,8 +56,7 @@ class JackKnowledgeBase:
         action = random.choice(actions)
         descriptor = random.choice(descriptors)
 
-        response = f"Jack decides to {verb} {action} {descriptor}."
-        return response
+        return f"Jack decides to {verb} {action} {descriptor}."
 
 # -----------------------------
 # Initialize Jack
@@ -87,9 +83,19 @@ if not jack.knowledge:
 # -----------------------------
 st.title("Jack")
 
+# Initialize session state for chat history
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
 # Chat input
-user_input = st.text_input("You:", placeholder="Type a question or message for Jack")
+user_input = st.text_input("You:", placeholder="Type a message for Jack")
 if st.button("Send"):
     if user_input:
+        # Add user message to history
+        st.session_state.chat_history.append(f"Señor: {user_input}")
+        # Generate Jack's response
         response = jack.generate_response(user_input)
-        st.text_area("Jack:", value=response, height=200)
+        st.session_state.chat_history.append(f"Jack: {response}")
+
+# Display chat history
+st.text_area("Chat History", value="\n".join(st.session_state.chat_history), height=400, key="chat_area")
