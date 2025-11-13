@@ -1,5 +1,9 @@
+import streamlit as st
 import json
 
+# -----------------------------
+# Jack Knowledge Base Class
+# -----------------------------
 class JackKnowledgeBase:
     def __init__(self, filename="jack_kb.json"):
         self.filename = filename
@@ -8,7 +12,6 @@ class JackKnowledgeBase:
         self.load()
 
     def load(self):
-        """Load saved knowledge from file."""
         try:
             with open(self.filename, "r", encoding="utf-8") as f:
                 self.knowledge = json.load(f)
@@ -16,50 +19,37 @@ class JackKnowledgeBase:
             self.knowledge = {}
 
     def save(self):
-        """Save the knowledge base to file."""
         with open(self.filename, "w", encoding="utf-8") as f:
             json.dump(self.knowledge, f, indent=4, ensure_ascii=False)
 
-    def greet(self):
-        print(f"Hello Señor! I am {self.name}, your intelligent knowledge assistant.")
-        print("How can I help you today?\n")
-
     def add_word(self, word: str, definition: str):
-        """Add or update a word definition."""
         word = word.lower()
         self.knowledge[word] = definition
         self.save()
-        print(f"{self.name}: Added '{word}' to your knowledge base, Señor.")
+        return f"✅ Added '{word}' to the knowledge base, Señor."
 
     def get_definition(self, word: str):
-        """Retrieve the definition of a word."""
         word = word.lower()
         if word in self.knowledge:
-            print(f"{self.name}: {word.capitalize()} means \"{self.knowledge[word]}\", Señor.")
-            return self.knowledge[word]
+            return f"{word.capitalize()}: {self.knowledge[word]}"
         else:
-            print(f"{self.name}: I’m sorry Señor, I don’t know that word yet.")
-            return None
+            return f"❌ I’m sorry Señor, I don’t know that word yet."
 
     def search(self, keyword: str):
-        """Search for words or definitions containing a keyword."""
         keyword = keyword.lower()
         results = {w: d for w, d in self.knowledge.items() if keyword in w or keyword in d}
         if results:
-            print(f"{self.name}: I found {len(results)} results for '{keyword}', Señor:")
-            for w, d in results.items():
-                print(f" - {w.capitalize()}: {d}")
+            return results
         else:
-            print(f"{self.name}: No matches found for '{keyword}', Señor.")
-        return results
+            return None
 
+# -----------------------------
+# Initialize Jack
+# -----------------------------
+jack = JackKnowledgeBase()
 
-if __name__ == "__main__":
-    # Initialize Jack
-    jack = JackKnowledgeBase()
-    jack.greet()
-
-    # === Preloaded Knowledge — Expanded Word Bank ===
+# Preload knowledge if empty
+if not jack.knowledge:
     bulk_data = {
         "atom": "The smallest unit of ordinary matter that forms a chemical element.",
         "gravity": "The natural force that attracts a body toward the center of the earth, or toward any other physical body having mass.",
@@ -114,7 +104,6 @@ if __name__ == "__main__":
         "meteorology": "The branch of science concerned with the processes and phenomena of the atmosphere.",
         "astronomy": "The branch of science that deals with celestial objects, space, and the universe as a whole.",
         "cosmology": "The science of the origin and development of the universe.",
-        # Sprinkled extra words
         "nanotechnology": "The branch of technology that deals with dimensions and tolerances of less than 100 nanometers.",
         "cybersecurity": "The practice of protecting systems, networks, and programs from digital attacks.",
         "renaissance": "The revival of art and literature under the influence of classical models in the 14th–16th centuries.",
@@ -123,11 +112,46 @@ if __name__ == "__main__":
         "aurora": "A natural electrical phenomenon characterized by the appearance of streamers of reddish or greenish light in the sky."
     }
 
-    # Load all words into Jack’s knowledge base
     for word, definition in bulk_data.items():
         jack.add_word(word, definition)
 
-    # === Example Interactions ===
-    jack.get_definition("gravity")
-    jack.search("science")
-    jack.get_definition("aurora")
+# -----------------------------
+# Streamlit Interface
+# -----------------------------
+st.title("Jack - Your Knowledge Base Assistant")
+st.write("Hello Señor! You can interact with Jack to query, add, or search words.")
+
+# Tabs for interaction
+tab1, tab2, tab3 = st.tabs(["Get Definition", "Add Word", "Search"])
+
+# --------------- Get Definition ----------------
+with tab1:
+    query_word = st.text_input("Enter a word to get its definition:")
+    if st.button("Get Definition"):
+        if query_word:
+            result = jack.get_definition(query_word)
+            st.write(result)
+
+# --------------- Add Word ----------------
+with tab2:
+    new_word = st.text_input("Enter a new word to add:")
+    new_def = st.text_area("Enter the definition for the new word:")
+    if st.button("Add Word"):
+        if new_word and new_def:
+            result = jack.add_word(new_word, new_def)
+            st.success(result)
+        else:
+            st.warning("Please enter both word and definition.")
+
+# --------------- Search ----------------
+with tab3:
+    search_term = st.text_input("Enter a keyword to search:")
+    if st.button("Search"):
+        if search_term:
+            results = jack.search(search_term)
+            if results:
+                st.write(f"Found {len(results)} result(s):")
+                for w, d in results.items():
+                    st.write(f"**{w.capitalize()}**: {d}")
+            else:
+                st.info(f"No results found for '{search_term}', Señor.")
