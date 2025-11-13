@@ -1,5 +1,6 @@
 import streamlit as st
 import json
+import random
 
 # -----------------------------
 # Jack Knowledge Base Class
@@ -26,22 +27,60 @@ class JackKnowledgeBase:
         word = word.lower()
         self.knowledge[word] = definition
         self.save()
-        return f"✅ Added '{word}' to the knowledge base, Señor."
+        return f"Got it, Señor. I've added '{word}' to my knowledge base."
 
-    def get_definition(self, word: str):
-        word = word.lower()
-        if word in self.knowledge:
-            return f"{word.capitalize()}: {self.knowledge[word]}"
-        else:
-            return f"❌ I’m sorry Señor, I don’t know that word yet."
+    def generate_response(self, message: str, chill_level: float):
+        """
+        Generates a conversational response. 
+        chill_level: 0 = formal/precise, 1 = super laid-back
+        """
+        message_lower = message.lower().strip()
 
-    def search(self, keyword: str):
-        keyword = keyword.lower()
-        results = {w: d for w, d in self.knowledge.items() if keyword in w or keyword in d}
-        if results:
-            return results
-        else:
-            return None
+        # Check if user asks about a known word
+        if message_lower in self.knowledge:
+            definition = self.knowledge[message_lower]
+            if chill_level < 0.4:
+                return f"{message.capitalize()}: {definition}"
+            else:
+                return f"Ah, {message}? Yeah, basically it's like this: {definition} 😎"
+
+        # Check if user wants to search
+        if message_lower.startswith("search "):
+            keyword = message_lower.replace("search ", "")
+            results = {w: d for w, d in self.knowledge.items() if keyword in w or keyword in d}
+            if results:
+                response = f"Found {len(results)} matches for '{keyword}', Señor:\n"
+                for w, d in results.items():
+                    response += f"- {w.capitalize()}: {d}\n"
+                if chill_level > 0.5:
+                    response += "\nPretty neat, right? 😏"
+                return response
+            else:
+                return f"No matches for '{keyword}', Señor."
+
+        # Otherwise, generate a laid-back or formal response
+        casual_phrases = [
+            "Cool, I hear you.",
+            "Gotcha, Señor.",
+            "Yeah, makes sense.",
+            "Hmm, interesting!",
+            "Alright, let's roll with that.",
+            "You got it, Señor 😎."
+        ]
+
+        formal_phrases = [
+            "Understood, Señor.",
+            "I see your point.",
+            "Acknowledged.",
+            "Thank you for the information.",
+            "Let me think about that."
+        ]
+
+        # Adjust response length based on chill_level
+        length_multiplier = int(1 + chill_level * 3)  # 1-4 sentences
+        response_list = casual_phrases if chill_level > 0.5 else formal_phrases
+        response = " ".join(random.choices(response_list, k=length_multiplier))
+        return response
 
 # -----------------------------
 # Initialize Jack
@@ -118,40 +157,16 @@ if not jack.knowledge:
 # -----------------------------
 # Streamlit Interface
 # -----------------------------
-st.title("Jack - Your Knowledge Base Assistant")
-st.write("Hello Señor! You can interact with Jack to query, add, or search words.")
+st.title("Jack - Your Chill Knowledge Assistant")
+st.write("Hello Señor! Chat with me, ask questions, search, or add new words. Adjust my chill level below.")
 
-# Tabs for interaction
-tab1, tab2, tab3 = st.tabs(["Get Definition", "Add Word", "Search"])
+# Chill/length slider
+chill_level = st.slider("Jack's chill level", 0.0, 1.0, 0.5, 0.05)
+st.caption("0 = formal & concise, 1 = super chill & laid-back")
 
-# --------------- Get Definition ----------------
-with tab1:
-    query_word = st.text_input("Enter a word to get its definition:")
-    if st.button("Get Definition"):
-        if query_word:
-            result = jack.get_definition(query_word)
-            st.write(result)
-
-# --------------- Add Word ----------------
-with tab2:
-    new_word = st.text_input("Enter a new word to add:")
-    new_def = st.text_area("Enter the definition for the new word:")
-    if st.button("Add Word"):
-        if new_word and new_def:
-            result = jack.add_word(new_word, new_def)
-            st.success(result)
-        else:
-            st.warning("Please enter both word and definition.")
-
-# --------------- Search ----------------
-with tab3:
-    search_term = st.text_input("Enter a keyword to search:")
-    if st.button("Search"):
-        if search_term:
-            results = jack.search(search_term)
-            if results:
-                st.write(f"Found {len(results)} result(s):")
-                for w, d in results.items():
-                    st.write(f"**{w.capitalize()}**: {d}")
-            else:
-                st.info(f"No results found for '{search_term}', Señor.")
+# Chat input
+user_input = st.text_input("You:", placeholder="Type a message or ask about a word...")
+if st.button("Send"):
+    if user_input:
+        response = jack.generate_response(user_input, chill_level)
+        st.text_area("Jack:", value=response, height=200)
