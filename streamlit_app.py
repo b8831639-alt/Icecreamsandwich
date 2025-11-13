@@ -8,8 +8,12 @@ import random
 class JackKnowledgeBase:
     def __init__(self, filename="jack_kb.json"):
         self.filename = filename
-        self.name = "Jack"
+        self.name = "Jack"  # the sword
         self.knowledge = {}
+        self.friends = [
+            "Magnus Chase", "Alex Fierro", "Mallory Keen",
+            "Halfborn Gunderson", "Samirah al-Abbas", "Thomas Jefferson Jr. (T.J.)"
+        ]
         self.load()
 
     def load(self):
@@ -27,24 +31,29 @@ class JackKnowledgeBase:
         word = word.lower()
         self.knowledge[word] = definition
         self.save()
-        return f"Got it, Señor. I've added '{word}' to my knowledge base."
+        return f"Alright Señor, '{word}' is now part of my brain. Magnus would be proud… maybe."
 
     def generate_response(self, message: str, chill_level: float):
         """
-        Generates a conversational response. 
-        chill_level: 0 = formal/precise, 1 = super laid-back
+        Generates a response as Jack (the sword) with Magnus Chase-style personality.
+        chill_level: 0 = sharp, formal; 1 = sarcastic, witty, laid-back
         """
         message_lower = message.lower().strip()
 
-        # Check if user asks about a known word
+        # Check if asking about a known word
         if message_lower in self.knowledge:
             definition = self.knowledge[message_lower]
             if chill_level < 0.4:
                 return f"{message.capitalize()}: {definition}"
             else:
-                return f"Ah, {message}? Yeah, basically it's like this: {definition} 😎"
+                twists = [
+                    f"{message}? Well, it's basically this: {definition}. Magnus would probably roll his eyes. 😏",
+                    f"Ah, {message}! Fun fact: {definition}. Alex might argue about this too.",
+                    f"Alright, if you really want to know, Señor: {definition}. Mallory might give me a 'tsk', but whatever."
+                ]
+                return random.choice(twists)
 
-        # Check if user wants to search
+        # Check for search
         if message_lower.startswith("search "):
             keyword = message_lower.replace("search ", "")
             results = {w: d for w, d in self.knowledge.items() if keyword in w or keyword in d}
@@ -53,28 +62,34 @@ class JackKnowledgeBase:
                 for w, d in results.items():
                     response += f"- {w.capitalize()}: {d}\n"
                 if chill_level > 0.5:
-                    response += "\nPretty neat, right? 😏"
+                    friend = random.choice(self.friends)
+                    response += f"\nNot too shabby, right? {friend} would approve. 😎"
                 return response
             else:
-                return f"No matches for '{keyword}', Señor."
+                return f"No luck finding '{keyword}', Señor. Even T.J. might have trouble with this one."
 
-        # Otherwise, generate a laid-back or formal response
+        # General conversational Jack-style responses
         casual_phrases = [
-            "Cool, I hear you.",
-            "Gotcha, Señor.",
-            "Yeah, makes sense.",
-            "Hmm, interesting!",
-            "Alright, let's roll with that.",
-            "You got it, Señor 😎."
+            "You think you can stump me? Try harder. 😏",
+            "Alright, Señor, let's see what happens.",
+            "Sure, yeah… that sounds like a plan.",
+            "Classic move, gotta admit, pretty clever.",
+            "Meh, could be worse. Let's roll with it.",
+            "Honestly, that's kinda funny 😎."
         ]
 
         formal_phrases = [
-            "Understood, Señor.",
-            "I see your point.",
-            "Acknowledged.",
-            "Thank you for the information.",
-            "Let me think about that."
+            "Acknowledged, Señor.",
+            "Understood. Let me process that.",
+            "Interesting… noted.",
+            "Alright, we can proceed accordingly.",
+            "Thank you for the clarification."
         ]
+
+        # Add references to friends if chill_level is high
+        if chill_level > 0.5 and random.random() < 0.3:  # 30% chance to mention a friend
+            friend = random.choice(self.friends)
+            casual_phrases.append(f"By the way, {friend} would have something to say about that. 😏")
 
         # Adjust response length based on chill_level
         length_multiplier = int(1 + chill_level * 3)  # 1-4 sentences
@@ -157,15 +172,15 @@ if not jack.knowledge:
 # -----------------------------
 # Streamlit Interface
 # -----------------------------
-st.title("Jack - Your Chill Knowledge Assistant")
-st.write("Hello Señor! Chat with me, ask questions, search, or add new words. Adjust my chill level below.")
+st.title("Jack - The Sword from Magnus Chase Universe 🗡️")
+st.write("Hello Señor! I'm Jack, witty, sarcastic, and fully chill. Chat with me, ask questions, or search my knowledge base. I might reference Magnus and my friends!")
 
-# Chill/length slider
-chill_level = st.slider("Jack's chill level", 0.0, 1.0, 0.5, 0.05)
-st.caption("0 = formal & concise, 1 = super chill & laid-back")
+# Chill/laid-back slider
+chill_level = st.slider("Jack's chill level", 0.0, 1.0, 0.6, 0.05)
+st.caption("0 = sharp/formal, 1 = sarcastic, witty, and laid-back")
 
 # Chat input
-user_input = st.text_input("You:", placeholder="Type a message or ask about a word...")
+user_input = st.text_input("You:", placeholder="Type a message or ask a question...")
 if st.button("Send"):
     if user_input:
         response = jack.generate_response(user_input, chill_level)
