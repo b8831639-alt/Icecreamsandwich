@@ -8,6 +8,7 @@ class JackKnowledgeBase:
         self.load()
 
     def load(self):
+        """Load saved knowledge from file."""
         try:
             with open(self.filename, "r", encoding="utf-8") as f:
                 self.knowledge = json.load(f)
@@ -15,48 +16,52 @@ class JackKnowledgeBase:
             self.knowledge = {}
 
     def save(self):
+        """Save the knowledge base to file."""
         with open(self.filename, "w", encoding="utf-8") as f:
             json.dump(self.knowledge, f, indent=4, ensure_ascii=False)
 
     def greet(self):
-        print(f"👋 Hola Señor! I am {self.name}, your intelligent knowledge assistant.")
-        print("How may I assist you today?\n")
+        print(f"Hello Señor! I am {self.name}, your intelligent knowledge assistant.")
+        print("How can I help you today?\n")
 
     def add_word(self, word: str, definition: str):
+        """Add or update a word definition."""
         word = word.lower()
         self.knowledge[word] = definition
         self.save()
-        print(f"{self.name}: ✅ Added '{word}' to your knowledge base, Señor.")
+        print(f"{self.name}: Added '{word}' to your knowledge base, Señor.")
 
     def get_definition(self, word: str):
+        """Retrieve the definition of a word."""
         word = word.lower()
         if word in self.knowledge:
-            print(f"{self.name}: {word.capitalize()} means \"{self.knowledge[word]}\" Señor.")
+            print(f"{self.name}: {word.capitalize()} means \"{self.knowledge[word]}\", Señor.")
             return self.knowledge[word]
         else:
-            print(f"{self.name}: ❌ I'm sorry Señor, I don't know that word yet.")
+            print(f"{self.name}: I’m sorry Señor, I don’t know that word yet.")
             return None
 
     def search(self, keyword: str):
+        """Search for words or definitions containing a keyword."""
         keyword = keyword.lower()
         results = {w: d for w, d in self.knowledge.items() if keyword in w or keyword in d}
         if results:
-            print(f"{self.name}: 🔍 I found {len(results)} matches for '{keyword}', Señor:")
+            print(f"{self.name}: I found {len(results)} results for '{keyword}', Señor:")
             for w, d in results.items():
                 print(f" - {w.capitalize()}: {d}")
         else:
-            print(f"{self.name}: 😕 No matches found for '{keyword}', Señor.")
+            print(f"{self.name}: No matches found for '{keyword}', Señor.")
         return results
 
 
 if __name__ == "__main__":
+    # Initialize Jack
     jack = JackKnowledgeBase()
     jack.greet()
 
-    # === Preloaded Knowledge ===
+    # === Preloaded Knowledge — Expanded Word Bank ===
     bulk_data = {
-
-         "atom": "The smallest unit of ordinary matter that forms a chemical element.",
+        "atom": "The smallest unit of ordinary matter that forms a chemical element.",
         "gravity": "The natural force that attracts a body toward the center of the earth, or toward any other physical body having mass.",
         "photosynthesis": "The process by which green plants use sunlight to synthesize foods from carbon dioxide and water.",
         "evolution": "The process by which different kinds of living organisms are thought to have developed from earlier forms during the history of the earth.",
@@ -108,13 +113,21 @@ if __name__ == "__main__":
         "geology": "The science that deals with the earth's physical structure and substance.",
         "meteorology": "The branch of science concerned with the processes and phenomena of the atmosphere.",
         "astronomy": "The branch of science that deals with celestial objects, space, and the universe as a whole.",
-        "cosmology": "The science of the origin and development of the universe."
+        "cosmology": "The science of the origin and development of the universe.",
+        # Sprinkled extra words
+        "nanotechnology": "The branch of technology that deals with dimensions and tolerances of less than 100 nanometers.",
+        "cybersecurity": "The practice of protecting systems, networks, and programs from digital attacks.",
+        "renaissance": "The revival of art and literature under the influence of classical models in the 14th–16th centuries.",
+        "demography": "The statistical study of populations, including the structure, distribution, and trends.",
+        "cryptography": "The art of writing or solving codes.",
+        "aurora": "A natural electrical phenomenon characterized by the appearance of streamers of reddish or greenish light in the sky."
     }
 
-    # Load this massive dictionary into the KB
+    # Load all words into Jack’s knowledge base
     for word, definition in bulk_data.items():
-        kb.add_word(word, definition)
+        jack.add_word(word, definition)
 
-    # Example queries
-    kb.get_definition("gravity")
-    kb.search("science")
+    # === Example Interactions ===
+    jack.get_definition("gravity")
+    jack.search("science")
+    jack.get_definition("aurora")
